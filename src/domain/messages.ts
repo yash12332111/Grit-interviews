@@ -190,3 +190,4 @@ export function badgeNullifiedMessage(ctx: BadgeNullifiedContext): MessageOutput
     ctaHref: "/student/badges",
   };
 }
+

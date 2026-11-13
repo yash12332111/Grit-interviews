@@ -61,3 +61,4 @@ describe("Transition Matrix (architecture §6.2)", () => {
     expect(rejectedCount).toBe(testedCount - allowedCount);
   });
 });
+

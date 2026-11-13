@@ -38,3 +38,4 @@ export async function ensureFreshDemo(db: AppDatabase): Promise<boolean> {
 
   return reseeded;
 }
+
