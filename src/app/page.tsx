@@ -1,69 +1,101 @@
-import Image from "next/image";
+import Link from "next/link";
+import { listPersonas, type Persona } from "@/db/queries/personas";
+import { JourneyState } from "@/domain/states";
+import { PersonaButton } from "@/components/shared/PersonaButton";
+import { ResetDemoButton } from "@/components/shared/ResetDemoButton";
+import { NoticeToast } from "@/components/shared/NoticeToast";
 
-export default function Home() {
+type Tone = "neutral" | "good" | "warn" | "bad" | "info";
+
+const HINT_TONE: Record<JourneyState, Tone> = {
+  [JourneyState.NOT_ELIGIBLE]: "neutral",
+  [JourneyState.READY_TO_BOOK]: "info",
+  [JourneyState.RETAKE_COOLDOWN]: "warn",
+  [JourneyState.BOOKED]: "info",
+  [JourneyState.AWAITING_RESULT]: "warn",
+  [JourneyState.RESCHEDULE_REQUIRED]: "warn",
+  [JourneyState.PASSED]: "good",
+  [JourneyState.FAILED]: "bad",
+  [JourneyState.BADGE_NULLIFIED]: "bad",
+};
+
+function Section({
+  title,
+  blurb,
+  children,
+}: {
+  title: string;
+  blurb: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <section className="space-y-3">
+      <div>
+        <h2 className="text-lg font-semibold">{title}</h2>
+        <p className="text-sm text-muted-foreground">{blurb}</p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
+    </section>
+  );
+}
+
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const [{ notice }, groups] = await Promise.all([searchParams, listPersonas()]);
+
+  const student = (p: Persona) => (
+    <PersonaButton
+      key={p.id}
+      id={p.id}
+      name={p.name}
+      hint={p.hint}
+      tone={p.hintState ? HINT_TONE[p.hintState] : "neutral"}
+    />
+  );
+
+  return (
+    <div className="mx-auto w-full max-w-6xl space-y-8 px-4 py-8">
+      <NoticeToast notice={typeof notice === "string" ? notice : undefined} />
+
+      <div className="space-y-3">
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          GRIT interview scheduling
+        </h1>
+        <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
+          How to explore: pick a student to book or see a result, an interviewer to set
+          availability and record outcomes, or the interview team to see who has booked.
+          The tags on each student show where they are right now, and you can switch
+          persona any time from the bar at the top.
+        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <ResetDemoButton />
+          <Link
+            href="/showcase"
+            className="text-sm font-medium underline underline-offset-4 hover:text-foreground/80"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            See before/after screens and key messages
+          </Link>
         </div>
-      </main>
+      </div>
+
+      <Section title="Students" blurb="Book an interview, reschedule, or see a result.">
+        {groups.students.map(student)}
+      </Section>
+
+      <Section title="Interviewers" blurb="Set availability, run the daily schedule, record outcomes.">
+        {groups.interviewers.map((p) => (
+          <PersonaButton key={p.id} id={p.id} name={p.name} description="Availability and schedule" />
+        ))}
+      </Section>
+
+      <Section title="Interview team" blurb="See who has booked and who hasn't; flag malpractice.">
+        {groups.teamAdmins.map((p) => (
+          <PersonaButton key={p.id} id={p.id} name={p.name} description="Booking tracker" />
+        ))}
+      </Section>
     </div>
   );
 }

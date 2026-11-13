@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
+import { FreshDemoGate } from "@/components/shared/FreshDemoGate";
+import { DemoBanner } from "@/components/shared/DemoBanner";
+import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
 
-// Using system font stack instead of fetching from Google Fonts,
-// so the app builds and runs offline / in sandboxed environments.
-// Geist will still load on Vercel via next/font/google at build time
-// (network is available there). To avoid any build failure, we fall back
-// to system fonts here and add Geist via local variable if desired later.
+// System font stack (see globals.css) so the app builds and runs offline.
 
 export const metadata: Metadata = {
   title: "GRIT Interview Scheduling",
@@ -15,7 +16,19 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="flex min-h-full flex-col bg-background text-foreground">
+        {/* Everything below reads the DB or cookies, so it is rendered per
+            request (Cache Components: dynamic work lives inside <Suspense>). */}
+        <Suspense fallback={<LoadingSkeleton />}>
+          <FreshDemoGate>
+            <Suspense fallback={<div className="h-12 border-b bg-amber-50" />}>
+              <DemoBanner />
+            </Suspense>
+            <main className="flex flex-1 flex-col">{children}</main>
+          </FreshDemoGate>
+        </Suspense>
+        <Toaster position="top-center" />
+      </body>
     </html>
   );
 }
