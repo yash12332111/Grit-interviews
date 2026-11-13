@@ -21,7 +21,8 @@ export type ErrorCode = (typeof ERROR_CODES)[number];
 
 export type Failure = {
   ok: false;
-  error: { code: ErrorCode; message: string };
+  /** `fields` carries per-input messages for inline form errors (VALIDATION). */
+  error: { code: ErrorCode; message: string; fields?: Record<string, string> };
 };
 
 export type Success<T> = { ok: true; data: T };
@@ -53,8 +54,15 @@ export function ok<T>(data: T): Success<T> {
   return { ok: true, data };
 }
 
-export function fail(code: ErrorCode, message?: string): Failure {
-  return { ok: false, error: { code, message: message ?? DEFAULT_MESSAGES[code] } };
+export function fail(
+  code: ErrorCode,
+  message?: string,
+  fields?: Record<string, string>,
+): Failure {
+  return {
+    ok: false,
+    error: { code, message: message ?? DEFAULT_MESSAGES[code], ...(fields ? { fields } : {}) },
+  };
 }
 
 /**
@@ -63,10 +71,12 @@ export function fail(code: ErrorCode, message?: string): Failure {
  */
 export class ActionError extends Error {
   readonly code: ErrorCode;
-  constructor(code: ErrorCode, message?: string) {
+  readonly fields?: Record<string, string>;
+  constructor(code: ErrorCode, message?: string, fields?: Record<string, string>) {
     super(message ?? DEFAULT_MESSAGES[code]);
     this.name = "ActionError";
     this.code = code;
+    this.fields = fields;
   }
 }
 
@@ -75,7 +85,7 @@ export class ActionError extends Error {
  * logged on the server and never shown to the user (architecture §12 rule 3).
  */
 export function toFailure(err: unknown): Failure {
-  if (err instanceof ActionError) return fail(err.code, err.message);
+  if (err instanceof ActionError) return fail(err.code, err.message, err.fields);
   console.error("[action] unexpected error:", err);
   return fail("UNKNOWN");
 }

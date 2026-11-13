@@ -70,3 +70,24 @@ export function relativeDayLabel(d: Date, now: Date): string {
   if (diff === -1) return "Yesterday";
   return formatDate(d);
 }
+
+const IST_OFFSET = "+05:30";
+const MS_PER_MINUTE = 60_000;
+const MS_PER_DAY = 86_400_000;
+
+/** Midnight (start) of the IST calendar day that contains `d`, as a UTC instant. */
+export function istDayStart(d: Date): Date {
+  return new Date(`${istDayKey(d)}T00:00:00${IST_OFFSET}`);
+}
+
+/** The instant at `minutesOfDay` past midnight IST on the day `dayKey` ("YYYY-MM-DD"). Null if the date is invalid. */
+export function istInstant(dayKey: string, minutesOfDay: number): Date | null {
+  const midnight = new Date(`${dayKey}T00:00:00${IST_OFFSET}`);
+  if (Number.isNaN(midnight.getTime()) || istDayKey(midnight) !== dayKey) return null;
+  return new Date(midnight.getTime() + minutesOfDay * MS_PER_MINUTE);
+}
+
+/** `n` whole IST days after `d` (IST has no daylight saving, so a day is always 24h). */
+export function addIstDays(d: Date, n: number): Date {
+  return new Date(d.getTime() + n * MS_PER_DAY);
+}
