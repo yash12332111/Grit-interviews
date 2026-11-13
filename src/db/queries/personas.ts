@@ -3,6 +3,7 @@
 // student (derived with deriveJourneyState, never stored).
 
 import { connection } from "next/server";
+import { withReadRetry } from "@/db/read";
 import { eq, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
@@ -65,7 +66,7 @@ function titleCase(level: string): string {
     .join(" ");
 }
 
-export async function listPersonas(): Promise<PersonaGroups> {
+async function listPersonasOnce(): Promise<PersonaGroups> {
   // The Neon driver isn't visible to Next's prerenderer, so opt out explicitly.
   await connection();
   const [
@@ -171,3 +172,6 @@ export async function listPersonas(): Promise<PersonaGroups> {
     teamAdmins: all.filter((p) => p.role === "team_admin").sort(byId),
   };
 }
+
+// Reads retry once on a connection error (see src/db/read.ts).
+export const listPersonas = withReadRetry(listPersonasOnce);

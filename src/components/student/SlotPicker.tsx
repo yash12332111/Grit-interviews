@@ -68,6 +68,10 @@ export function SlotPicker({ attemptId, badgeLabel, days, reschedule }: SlotPick
       return false;
     }
     toast.error(message);
+    if (code === "INVALID_TRANSITION") {
+      router.refresh(); // already updated: show the latest state
+      return;
+    }
     return false;
   };
 

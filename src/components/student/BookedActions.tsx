@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -24,6 +25,7 @@ export function BookedActions({
   canReschedule,
   canCancel,
 }: BookedActionsProps) {
+  const router = useRouter();
   return (
     <div className="flex flex-wrap gap-2">
       {canReschedule ? (
@@ -51,6 +53,10 @@ export function BookedActions({
             const result = await cancelBooking({ bookingId });
             if (!result.ok) {
               toast.error(result.error.message);
+              if (result.error.code === "INVALID_TRANSITION") {
+                router.refresh(); // already updated: show the latest state
+                return;
+              }
               return false;
             }
             toast.success("Interview cancelled.");

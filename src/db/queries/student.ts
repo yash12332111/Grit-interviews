@@ -2,6 +2,7 @@
 // Read-only queries for the student area.
 
 import { connection } from "next/server";
+import { withReadRetry } from "@/db/read";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
@@ -88,7 +89,7 @@ export type StudentHome = {
  * eligibility, attempt or award (else one NOT_ELIGIBLE journey for the track's
  * first badge), plus the latest unread notification.
  */
-export async function getStudentHome(studentId: string): Promise<StudentHome> {
+async function getStudentHomeOnce(studentId: string): Promise<StudentHome> {
   await connection();
 
   const [badgeRows, eligRows, attemptRows, bookingRows, awardRows, notifRows] = await Promise.all([
@@ -239,7 +240,7 @@ export type BookingTarget = {
  * attempt doesn't exist or belongs to someone else, which the page turns into
  * a not-found screen.
  */
-export async function getBookingTarget(
+async function getBookingTargetOnce(
   studentId: string,
   attemptId: string,
   bookingId: string | null,
@@ -284,3 +285,7 @@ export async function getBookingTarget(
     currentBooking,
   };
 }
+
+// Reads retry once on a connection error (see src/db/read.ts).
+export const getStudentHome = withReadRetry(getStudentHomeOnce);
+export const getBookingTarget = withReadRetry(getBookingTargetOnce);

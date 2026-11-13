@@ -2,6 +2,7 @@
 // Read-only queries for the interviewer area.
 
 import { connection } from "next/server";
+import { withReadRetry } from "@/db/read";
 import { and, asc, eq, gte, inArray, lt, lte } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
@@ -38,7 +39,7 @@ export const WEEK_DAYS = 7;
  * The interviewer's slots for the 7 IST days starting today, each with a
  * derived open / booked / withdrawn status and the booked student's name.
  */
-export async function getWeekSlots(interviewerId: string): Promise<{
+async function getWeekSlotsOnce(interviewerId: string): Promise<{
   from: Date;
   slots: SlotView[];
 }> {
@@ -156,7 +157,7 @@ function toScheduleItem(r: Awaited<ReturnType<typeof scheduleSelect>>[number], n
 }
 
 /** The interviewer's bookings on one IST day (active, completed, no-show), in time order. */
-export async function getDaySchedule(
+async function getDayScheduleOnce(
   interviewerId: string,
   dayKey: string,
 ): Promise<{ now: Date; items: ScheduleItem[] }> {
@@ -183,7 +184,7 @@ export async function getDaySchedule(
  * The interviewer's ACTIVE bookings whose start has passed, from any day,
  * oldest first. Overdue ones (older than OUTCOME_OVERDUE_HOURS) are flagged.
  */
-export async function getAwaitingOutcome(interviewerId: string): Promise<ScheduleItem[]> {
+async function getAwaitingOutcomeOnce(interviewerId: string): Promise<ScheduleItem[]> {
   await connection();
   const now = new Date();
   const rows = await scheduleSelect()
@@ -197,3 +198,8 @@ export async function getAwaitingOutcome(interviewerId: string): Promise<Schedul
     .orderBy(asc(availabilitySlots.start_at));
   return rows.map((r) => toScheduleItem(r, now));
 }
+
+// Reads retry once on a connection error (see src/db/read.ts).
+export const getWeekSlots = withReadRetry(getWeekSlotsOnce);
+export const getDaySchedule = withReadRetry(getDayScheduleOnce);
+export const getAwaitingOutcome = withReadRetry(getAwaitingOutcomeOnce);

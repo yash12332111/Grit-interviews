@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ type WithdrawSlotButtonProps = {
 };
 
 export function WithdrawSlotButton({ slotId, whenLabel, studentName }: WithdrawSlotButtonProps) {
+  const router = useRouter();
   const [reason, setReason] = useState("");
   const [reasonError, setReasonError] = useState<string | null>(null);
   const booked = studentName !== null;
@@ -42,6 +44,10 @@ export function WithdrawSlotButton({ slotId, whenLabel, studentName }: WithdrawS
         if (!result.ok) {
           if (result.error.fields?.reason) setReasonError(result.error.fields.reason);
           else toast.error(result.error.message);
+          if (result.error.code === "INVALID_TRANSITION") {
+            router.refresh(); // already updated: show the latest state
+            return;
+          }
           return false;
         }
         toast.success(

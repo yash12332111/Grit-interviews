@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ const REASON_MAX = 500;
 
 /** Row action on PASSED rows: nullify the badge, with a mandatory reason. */
 export function FlagDialog({ badgeAwardId, studentName, badgeLabel }: FlagDialogProps) {
+  const router = useRouter();
   const [reason, setReason] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -38,6 +40,10 @@ export function FlagDialog({ badgeAwardId, studentName, badgeLabel }: FlagDialog
         if (!result.ok) {
           if (result.error.fields?.reason) setError(result.error.fields.reason);
           else toast.error(result.error.message);
+          if (result.error.code === "INVALID_TRANSITION") {
+            router.refresh(); // already updated: show the latest state
+            return;
+          }
           return false;
         }
         toast.success(`${badgeLabel} badge nullified for ${studentName}.`);

@@ -2,6 +2,7 @@
 // Read-only: the interview team's booked / not-booked tracker (architecture §8.1 /team).
 
 import { connection } from "next/server";
+import { withReadRetry } from "@/db/read";
 import { eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/db/client";
@@ -59,7 +60,7 @@ export type TrackerRow = {
  * an award (active or nullified) for that badge. Failed students (eligibility
  * revoked, no award) are not listed.
  */
-export async function getTrackerRows(): Promise<{ now: Date; rows: TrackerRow[] }> {
+async function getTrackerRowsOnce(): Promise<{ now: Date; rows: TrackerRow[] }> {
   await connection();
   const interviewer = alias(users, "interviewer");
 
@@ -147,3 +148,6 @@ export async function getTrackerRows(): Promise<{ now: Date; rows: TrackerRow[] 
 
   return { now, rows };
 }
+
+// Reads retry once on a connection error (see src/db/read.ts).
+export const getTrackerRows = withReadRetry(getTrackerRowsOnce);

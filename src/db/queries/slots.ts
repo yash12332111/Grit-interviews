@@ -2,6 +2,7 @@
 // Read-only: the pooled open times students can book (architecture A-04, A-06).
 
 import { connection } from "next/server";
+import { withReadRetry } from "@/db/read";
 import { and, asc, eq, gte, lte, notExists, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { availabilitySlots, bookings } from "@/db/schema";
@@ -23,7 +24,7 @@ const DAY_MS = 24 * HOUR_MS;
  * A time is open when at least one non-withdrawn slot starts then and has no
  * active booking, however many interviewers offer it.
  */
-export async function getOpenTimes(): Promise<OpenTimesDay[]> {
+async function getOpenTimesOnce(): Promise<OpenTimesDay[]> {
   await connection();
   const now = Date.now();
   const from = new Date(now + BOOK_MIN_LEAD_HOURS * HOUR_MS);
@@ -59,3 +60,6 @@ export async function getOpenTimes(): Promise<OpenTimesDay[]> {
   }
   return days;
 }
+
+// Reads retry once on a connection error (see src/db/read.ts).
+export const getOpenTimes = withReadRetry(getOpenTimesOnce);

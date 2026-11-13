@@ -46,16 +46,6 @@ function revalidateAffected() {
   revalidatePath("/team");
 }
 
-/** A Postgres unique violation (23505), whether or not the ORM wrapped it. */
-function isUniqueViolation(err: unknown): boolean {
-  let e = err as { code?: unknown; cause?: unknown } | undefined;
-  for (let i = 0; i < 4 && e; i++) {
-    if (e.code === "23505") return true;
-    e = e.cause as typeof e;
-  }
-  return false;
-}
-
 /**
  * Records the interview result for one of the acting interviewer's own
  * bookings (F2; T8–T10) and applies exactly the §6.3 side effects in one
@@ -234,8 +224,8 @@ export async function recordOutcome(input: {
     revalidateAffected();
     return ok(data);
   } catch (err) {
-    // A duplicate award / attempt means this was already recorded.
-    if (isUniqueViolation(err)) return toFailure(new ActionError("INVALID_TRANSITION"));
+    // A duplicate award / attempt (unique violation) is mapped to
+    // INVALID_TRANSITION by toFailure: it was already recorded.
     return toFailure(err);
   }
 }

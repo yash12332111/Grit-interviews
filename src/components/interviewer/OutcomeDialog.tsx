@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const OUTCOME_LABEL: Record<OutcomeValue, string> = {
 
 /** Two steps: choose the outcome (with optional notes), then confirm a one-line consequence. */
 export function OutcomeDialog({ bookingId, studentName, badgeLabel, bonusMiles }: OutcomeDialogProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<"choose" | "confirm">("choose");
   const [outcome, setOutcome] = useState<OutcomeValue | null>(null);
@@ -83,6 +85,7 @@ export function OutcomeDialog({ bookingId, studentName, badgeLabel, bonusMiles }
       if (result.error.code === "INVALID_TRANSITION") {
         setOpen(false);
         reset();
+        router.refresh();
       }
     });
   };

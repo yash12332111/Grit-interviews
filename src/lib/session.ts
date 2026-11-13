@@ -3,10 +3,12 @@
 // chosen user id. There is no real authentication.
 
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db/client";
+import { withReadRetry } from "@/db/read";
 import { users } from "@/db/schema";
 import { ActionError } from "@/lib/result";
 import type { UserRole } from "@/domain/states";
@@ -22,6 +24,24 @@ export type Actor = {
 };
 
 const uuidSchema = z.guid();
+
+/** The persona lookup is a read, so it retries once on a connection error. */
+const findUser = withReadRetry(async (id: string) => {
+  // Keep the lookup out of any prerender (including prefetch renders, where
+  // cookies() can resolve): opening a database connection there is aborted.
+  await connection();
+  const [row] = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+    })
+    .from(users)
+    .where(eq(users.id, id))
+    .limit(1);
+  return row ?? null;
+});
 
 /** Where each role lands after picking a persona. */
 export const ROLE_HOME: Record<UserRole, string> = {
@@ -74,16 +94,7 @@ export async function getActor(): Promise<Actor | null> {
   const raw = store.get(PERSONA_COOKIE)?.value;
   if (!raw || !uuidSchema.safeParse(raw).success) return null;
 
-  const [row] = await db
-    .select({
-      id: users.id,
-      name: users.name,
-      email: users.email,
-      role: users.role,
-    })
-    .from(users)
-    .where(eq(users.id, raw))
-    .limit(1);
+  const row = await findUser(raw);
 
   if (!row) {
     await clearPersonaCookie();

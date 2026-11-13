@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/shared/ConfirmDialog";
@@ -10,6 +11,7 @@ type NoShowButtonProps = { bookingId: string; studentName: string };
 
 /** "Student didn't join" records Retake later with reason no_show (A-11). */
 export function NoShowButton({ bookingId, studentName }: NoShowButtonProps) {
+  const router = useRouter();
   const first = studentName.split(" ")[0];
   return (
     <ConfirmDialog
@@ -29,7 +31,11 @@ export function NoShowButton({ bookingId, studentName }: NoShowButtonProps) {
         });
         if (!result.ok) {
           toast.error(result.error.message);
-          return result.error.code === "INVALID_TRANSITION" ? undefined : false;
+          if (result.error.code === "INVALID_TRANSITION") {
+            router.refresh(); // already updated: show the latest state
+            return;
+          }
+          return false;
         }
         toast.success(`Recorded no-show for ${studentName}.`);
       }}
