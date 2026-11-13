@@ -4,20 +4,26 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CHANGE_CUTOFF_HOURS, MAX_RESCHEDULES } from "@/domain/config";
 import { canCancel, canReschedule } from "@/domain/rules";
-import { JourneyState } from "@/domain/states";
+import { JOURNEY_STATE_LABEL, JourneyState } from "@/domain/states";
 import { formatDate, formatDateTime, relativeDayLabel } from "@/lib/time";
 import type { JourneyView } from "@/db/queries/student";
-import { JOURNEY_STATE_LABEL } from "@/db/queries/personas";
 import { BookedActions } from "./BookedActions";
 
 const HOUR_MS = 60 * 60 * 1000;
 
+type JourneyCardProps = {
+  journey: JourneyView;
+  now: Date;
+  /** The student's next badge journey in this track, for the "next up" hint on a passed card. */
+  next?: { label: string; state: JourneyState } | null;
+};
+
 /** One card per badge journey on the student home. */
-export function JourneyCard({ journey, now }: { journey: JourneyView; now: Date }) {
-  const { badge, state, attempt, booking } = journey;
+export function JourneyCard({ journey, now, next = null }: JourneyCardProps) {
+  const { badge, state, attempt, booking, award, lastResult } = journey;
 
   return (
-    <Card>
+    <Card data-state={state}>
       <CardHeader className="flex-row items-center justify-between gap-2">
         <CardTitle className="text-base">{badge.label} badge</CardTitle>
         <Badge variant="secondary">{JOURNEY_STATE_LABEL[state]}</Badge>
@@ -32,6 +38,7 @@ export function JourneyCard({ journey, now }: { journey: JourneyView; now: Date 
 
         {state === JourneyState.READY_TO_BOOK && attempt && (
           <>
+            {lastResult?.status === "retake_later" && <LastRetakeNote journey={journey} />}
             <p>You&apos;re eligible. Pick a time that works for you and lock in your interview.</p>
             <Link href={`/student/book/${attempt.id}`} className={buttonVariants()}>
               Book interview
@@ -40,10 +47,13 @@ export function JourneyCard({ journey, now }: { journey: JourneyView; now: Date 
         )}
 
         {state === JourneyState.RETAKE_COOLDOWN && attempt && (
-          <p>
-            Booking for your next attempt opens on{" "}
-            <strong>{formatDate(attempt.notBefore)}</strong>. Use the time to polish your answers.
-          </p>
+          <>
+            <LastRetakeNote journey={journey} />
+            <p>
+              Booking for your next attempt opens on{" "}
+              <strong>{formatDate(attempt.notBefore)}</strong>. Use the time to polish your answers.
+            </p>
+          </>
         )}
 
         {state === JourneyState.BOOKED && attempt && booking && (
@@ -75,17 +85,81 @@ export function JourneyCard({ journey, now }: { journey: JourneyView; now: Date 
           </p>
         )}
 
-        {(state === JourneyState.PASSED ||
-          state === JourneyState.FAILED ||
-          state === JourneyState.BADGE_NULLIFIED) && (
-          <p className="text-muted-foreground">
-            {state === JourneyState.PASSED && "Badge earned."}
-            {state === JourneyState.FAILED && "Not cleared this time."}
-            {state === JourneyState.BADGE_NULLIFIED && "This badge has been revoked."}
-          </p>
+        {state === JourneyState.PASSED && (
+          <>
+            <p>
+              <strong>Badge earned</strong>
+              {award ? ` on ${formatDate(award.awardedAt)}` : ""}. Well done!
+            </p>
+            <p className="text-base font-semibold text-emerald-700">
+              +{badge.bonusMiles} bonus miles
+            </p>
+            {lastResult?.status === "passed" && lastResult.notes ? (
+              <p className="text-muted-foreground">
+                Interviewer&apos;s note: <em>&ldquo;{lastResult.notes}&rdquo;</em>
+              </p>
+            ) : null}
+            {next ? (
+              <p className="text-muted-foreground">
+                Next up: <strong className="text-foreground">{next.label}</strong> (
+                {JOURNEY_STATE_LABEL[next.state].toLowerCase()}).
+              </p>
+            ) : null}
+          </>
+        )}
+
+        {state === JourneyState.FAILED && (
+          <>
+            <p>
+              You didn&apos;t clear the {badge.label} interview this time, and that&apos;s okay.
+              {lastResult?.status === "failed" && lastResult.notes ? (
+                <>
+                  {" "}
+                  Interviewer&apos;s note: <em>&ldquo;{lastResult.notes}&rdquo;</em>
+                </>
+              ) : null}
+            </p>
+            <p className="text-muted-foreground">
+              Re-qualifying through the GRIT skill contests reopens booking for this badge
+              automatically.
+            </p>
+          </>
+        )}
+
+        {state === JourneyState.BADGE_NULLIFIED && (
+          <>
+            <p>
+              This badge has been revoked following an internal review, so its bonus miles no
+              longer count.
+            </p>
+            {award?.nullificationReason ? (
+              <p className="text-muted-foreground">
+                Reason on record: <em>&ldquo;{award.nullificationReason}&rdquo;</em>
+              </p>
+            ) : null}
+          </>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+/** "Last attempt: Retake later" with the interviewer's notes, shown after a retake was granted. */
+function LastRetakeNote({ journey }: { journey: JourneyView }) {
+  const { lastResult, attempt } = journey;
+  if (lastResult?.status !== "retake_later") return null;
+  return (
+    <p className="text-muted-foreground">
+      {attempt ? `Attempt #${attempt.attemptNo}. ` : ""}Your last attempt was marked{" "}
+      <strong className="text-foreground">Retake later</strong>
+      {lastResult.noShow ? " because you couldn't join" : ""}.
+      {lastResult.notes ? (
+        <>
+          {" "}
+          Interviewer&apos;s note: <em>&ldquo;{lastResult.notes}&rdquo;</em>
+        </>
+      ) : null}
+    </p>
   );
 }
 

@@ -20,6 +20,7 @@ import {
   AttemptStatus,
   AwardStatus,
   BookingStatus,
+  JOURNEY_STATE_LABEL,
   JourneyState,
 } from "@/domain/states";
 import type { UserRole } from "@/domain/states";
@@ -40,17 +41,6 @@ export type Persona = {
   hintState: JourneyState | null;
 };
 
-export const JOURNEY_STATE_LABEL: Record<JourneyState, string> = {
-  [JourneyState.NOT_ELIGIBLE]: "Not eligible",
-  [JourneyState.READY_TO_BOOK]: "Ready to book",
-  [JourneyState.RETAKE_COOLDOWN]: "Retake cooldown",
-  [JourneyState.BOOKED]: "Booked",
-  [JourneyState.AWAITING_RESULT]: "Awaiting result",
-  [JourneyState.RESCHEDULE_REQUIRED]: "Reschedule required",
-  [JourneyState.PASSED]: "Passed",
-  [JourneyState.FAILED]: "Failed",
-  [JourneyState.BADGE_NULLIFIED]: "Badge nullified",
-};
 
 /**
  * When a student has several journeys, show the most actionable one first.

@@ -7,8 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { JOURNEY_STATE_LABEL } from "@/domain/states";
 import { formatDateTime } from "@/lib/time";
-import { JOURNEY_STATE_LABEL } from "@/db/queries/personas";
 import type { TrackerRow } from "@/db/queries/team";
 import { FlagDialog } from "./FlagDialog";
 

@@ -24,6 +24,12 @@ const OPEN_STATUSES: string[] = [
   AttemptStatus.RESCHEDULE_REQUIRED,
 ];
 
+const RESULT_STATUSES: string[] = [
+  AttemptStatus.PASSED,
+  AttemptStatus.FAILED,
+  AttemptStatus.RETAKE_LATER,
+];
+
 export type JourneyView = {
   badge: { id: string; level: string; label: string; rank: number; bonusMiles: number };
   state: JourneyState;
@@ -45,7 +51,19 @@ export type JourneyView = {
   } | null;
   /** Why the interviewer moved the slot (RESCHEDULE_REQUIRED only). */
   interviewerCancelReason: string | null;
-  award: { id: string; status: string; awardedAt: Date } | null;
+  award: {
+    id: string;
+    status: string;
+    awardedAt: Date;
+    nullifiedAt: Date | null;
+    nullificationReason: string | null;
+  } | null;
+  /** The latest recorded interview result (passed / failed / retake later), if any. */
+  lastResult: {
+    status: "passed" | "failed" | "retake_later";
+    notes: string | null;
+    noShow: boolean;
+  } | null;
 };
 
 export type NotificationView = {
@@ -58,7 +76,10 @@ export type NotificationView = {
 
 export type StudentHome = {
   now: Date;
+  /** Journeys shown as cards on the home screen (badges with an eligibility, attempt or award). */
   journeys: JourneyView[];
+  /** One journey per badge in the track (untouched badges are NOT_ELIGIBLE), for the badge shelf. */
+  allJourneys: JourneyView[];
   notification: NotificationView | null;
 };
 
@@ -111,10 +132,8 @@ export async function getStudentHome(studentId: string): Promise<StudentHome> {
   for (const w of awardRows) badgeIds.add(w.badge_id);
   if (badgeIds.size === 0 && badgeRows[0]) badgeIds.add(badgeRows[0].id);
 
-  const journeys: JourneyView[] = [];
+  const allJourneys: JourneyView[] = [];
   for (const badge of badgeRows) {
-    if (!badgeIds.has(badge.id)) continue;
-
     const attempts = attemptRows
       .filter((a) => a.badge_id === badge.id)
       .sort((a, b) => b.attempt_no - a.attempt_no);
@@ -145,7 +164,9 @@ export async function getStudentHome(studentId: string): Promise<StudentHome> {
         : null,
     };
 
-    journeys.push({
+    const result = attempts.find((a) => RESULT_STATUSES.includes(a.status));
+
+    allJourneys.push({
       badge: {
         id: badge.id,
         level: badge.level,
@@ -173,14 +194,31 @@ export async function getStudentHome(studentId: string): Promise<StudentHome> {
           }
         : null,
       interviewerCancelReason: cancelledByInterviewer?.cancelReason ?? null,
-      award: award ? { id: award.id, status: award.status, awardedAt: award.awarded_at } : null,
+      award: award
+        ? {
+            id: award.id,
+            status: award.status,
+            awardedAt: award.awarded_at,
+            nullifiedAt: award.nullified_at,
+            nullificationReason: award.nullification_reason,
+          }
+        : null,
+      lastResult: result
+        ? {
+            status: result.status as "passed" | "failed" | "retake_later",
+            notes: result.outcome_notes,
+            noShow: result.outcome_reason === "no_show",
+          }
+        : null,
     });
   }
+  const journeys = allJourneys.filter((j) => badgeIds.has(j.badge.id));
 
   const n = notifRows[0];
   return {
     now,
     journeys,
+    allJourneys,
     notification: n
       ? { id: n.id, title: n.title, body: n.body, ctaLabel: n.cta_label, ctaHref: n.cta_href }
       : null,

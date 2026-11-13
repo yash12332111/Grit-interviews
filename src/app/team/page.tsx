@@ -5,8 +5,7 @@ import {
   NOT_BOOKED_STATES,
   getTrackerRows,
 } from "@/db/queries/team";
-import { JOURNEY_STATE_LABEL } from "@/db/queries/personas";
-import { JourneyState, UserRole } from "@/domain/states";
+import { JOURNEY_STATE_LABEL, JourneyState, UserRole } from "@/domain/states";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { TrackerTable } from "@/components/team/TrackerTable";
 import { cn } from "@/lib/utils";

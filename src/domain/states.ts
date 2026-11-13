@@ -14,6 +14,19 @@ export enum JourneyState {
   BADGE_NULLIFIED = "BADGE_NULLIFIED",
 }
 
+/** Human-readable name of each journey state, for chips and hints. */
+export const JOURNEY_STATE_LABEL: Record<JourneyState, string> = {
+  [JourneyState.NOT_ELIGIBLE]: "Not eligible",
+  [JourneyState.READY_TO_BOOK]: "Ready to book",
+  [JourneyState.RETAKE_COOLDOWN]: "Retake cooldown",
+  [JourneyState.BOOKED]: "Booked",
+  [JourneyState.AWAITING_RESULT]: "Awaiting result",
+  [JourneyState.RESCHEDULE_REQUIRED]: "Reschedule required",
+  [JourneyState.PASSED]: "Passed",
+  [JourneyState.FAILED]: "Failed",
+  [JourneyState.BADGE_NULLIFIED]: "Badge nullified",
+};
+
 export enum AttemptStatus {
   AWAITING_BOOKING = "awaiting_booking",
   BOOKED = "booked",

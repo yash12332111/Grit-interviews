@@ -11,6 +11,7 @@ import {
   formatIST,
   formatDateOnlyIST,
 } from "@/domain/messages";
+import { SHOWCASE_MESSAGE_CONTEXTS, getShowcaseMessages } from "@/app/showcase/fixtures";
 
 describe("Message Templates (architecture §6.4)", () => {
   const testDate = new Date("2026-11-14T05:30:00.000Z"); // 11:00 AM IST
@@ -98,5 +99,32 @@ describe("Message Templates (architecture §6.4)", () => {
   it("formats date only in IST properly", () => {
     const dateOnly = formatDateOnlyIST(testDate);
     expect(dateOnly).toMatch(/14 Nov 2026/);
+  });
+});
+
+describe("Showcase messages match the real templates (brief #5: exactly as they appear)", () => {
+  const shown = getShowcaseMessages();
+  const ctx = SHOWCASE_MESSAGE_CONTEXTS;
+
+  it("Booking confirmed is the template output for the same context", () => {
+    expect(shown.bookingConfirmed).toEqual(bookingConfirmedMessage(ctx.bookingConfirmed));
+  });
+
+  it("Result: Passed is the template output for the same context", () => {
+    expect(shown.resultPassed).toEqual(resultPassedMessage(ctx.resultPassed));
+  });
+
+  it("Result: Retake later is the template output for the same context", () => {
+    expect(shown.resultRetake).toEqual(resultRetakeMessage(ctx.resultRetake));
+  });
+
+  it("the three showcase messages are complete (no placeholders, title and body present)", () => {
+    for (const m of Object.values(shown)) {
+      expect(m.title.length).toBeGreaterThan(0);
+      expect(m.body.length).toBeGreaterThan(0);
+      for (const bad of ["undefined", "null", "{", "}"]) {
+        expect(`${m.title} ${m.body} ${m.ctaLabel ?? ""}`).not.toContain(bad);
+      }
+    }
   });
 });
