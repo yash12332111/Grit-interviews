@@ -191,3 +191,11 @@ export function badgeNullifiedMessage(ctx: BadgeNullifiedContext): MessageOutput
   };
 }
 
+
+/** Display name of a badge level, e.g. "specialist" → "Specialist", "grand_master" → "Grand Master". */
+export function badgeLabel(level: string): string {
+  return level
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
