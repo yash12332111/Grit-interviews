@@ -3,6 +3,8 @@ import { getActor } from "@/lib/session";
 import { getAwaitingOutcome, getDaySchedule } from "@/db/queries/interviewer";
 import { UserRole } from "@/domain/states";
 import { buttonVariants } from "@/components/ui/button";
+import { CalendarDaysIcon, ChevronLeftIcon, ChevronRightIcon, ClockAlertIcon } from "lucide-react";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { ScheduleList } from "@/components/interviewer/ScheduleList";
 import { addIstDays, formatDateLong, istDayKey, relativeDayLabel } from "@/lib/time";
@@ -39,16 +41,16 @@ export default async function SchedulePage({
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-8 px-4 py-8">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Daily schedule</h1>
-        <p className="text-sm text-muted-foreground">
-          Your interviews, and the outcomes still waiting for you. Times are in IST.
-        </p>
-      </div>
+      <PageHeader
+        icon={CalendarDaysIcon}
+        title="Daily schedule"
+        description="Your interviews, and the outcomes still waiting for you. Times are in IST."
+      />
 
       {awaiting.length > 0 ? (
-        <section className="space-y-3" aria-labelledby="awaiting-heading">
-          <h2 id="awaiting-heading" className="text-lg font-semibold">
+        <section className="space-y-3 rounded-3xl border border-amber-200 bg-amber-50/50 p-4 sm:p-5" aria-labelledby="awaiting-heading">
+          <h2 id="awaiting-heading" className="flex items-center gap-2 text-lg font-semibold">
+            <ClockAlertIcon className="size-5 text-amber-600" aria-hidden="true" />
             Awaiting your outcome ({awaiting.length})
           </h2>
           <ScheduleList items={awaiting} showDate />
@@ -58,14 +60,15 @@ export default async function SchedulePage({
       <section className="space-y-3" aria-labelledby="day-heading">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 id="day-heading" className="text-lg font-semibold">
+            <h2 id="day-heading" className="text-xl font-bold">
               {relativeDayLabel(dayStart, now)}
             </h2>
             <p className="text-sm text-muted-foreground">{formatDateLong(dayStart)}</p>
           </div>
           <div className="flex gap-2">
             <Link href={`/interviewer/schedule?date=${prev}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
-              ← Previous day
+              <ChevronLeftIcon data-icon="inline-start" />
+              Previous day
             </Link>
             {dayKey !== todayKey ? (
               <Link href="/interviewer/schedule" className={buttonVariants({ variant: "outline", size: "sm" })}>
@@ -73,7 +76,8 @@ export default async function SchedulePage({
               </Link>
             ) : null}
             <Link href={`/interviewer/schedule?date=${next}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
-              Next day →
+              Next day
+              <ChevronRightIcon data-icon="inline-end" />
             </Link>
           </div>
         </div>

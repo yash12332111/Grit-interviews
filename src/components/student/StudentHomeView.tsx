@@ -37,9 +37,11 @@ export function StudentHomeView({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-2">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <Heading className="text-2xl font-semibold tracking-tight">Hi {firstName}</Heading>
+          <Heading className="text-3xl font-extrabold tracking-tight">
+            Hi <span className="text-grit">{firstName}</span>
+          </Heading>
           <p className="text-sm text-muted-foreground">Your GRIT badge interviews at a glance.</p>
         </div>
         <div className="flex flex-col items-end gap-1.5">
@@ -66,6 +68,9 @@ export function StudentHomeView({
       ) : null}
 
       <div className="space-y-4">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Your badge journeys
+        </h2>
         {journeys.map((journey, i) => {
           const later = journeys[i + 1];
           return (

@@ -9,6 +9,8 @@ import { AttemptStatus, UserRole } from "@/domain/states";
 import { buttonVariants } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { SlotPicker } from "@/components/student/SlotPicker";
+import { CalendarClockIcon } from "lucide-react";
+import { PageHeader } from "@/components/shared/PageHeader";
 import { formatDate, formatDateTime } from "@/lib/time";
 
 const idSchema = z.guid();
@@ -88,14 +90,11 @@ export default async function BookingPage({
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-8">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {wantsReschedule ? "Reschedule" : "Book"} your {target.badgeLabel} interview
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Interviews are {SLOT_MINUTES} minutes. Times are in IST and open from {BOOK_MIN_LEAD_HOURS} hours ahead, up to {BOOK_MAX_DAYS} days ahead.
-        </p>
-      </div>
+      <PageHeader
+        icon={CalendarClockIcon}
+        title={`${wantsReschedule ? "Reschedule" : "Book"} your ${target.badgeLabel} interview`}
+        description={`Interviews are ${SLOT_MINUTES} minutes. Times are in IST and open from ${BOOK_MIN_LEAD_HOURS} hours ahead, up to ${BOOK_MAX_DAYS} days ahead.`}
+      />
       {content}
     </div>
   );

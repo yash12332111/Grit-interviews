@@ -1,3 +1,4 @@
+import { SparklesIcon, TrophyIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tier } from "@/domain/states";
 import { cn } from "@/lib/utils";
@@ -14,10 +15,17 @@ export function TierChip({ tier }: { tier: Tier }) {
           : "Pre-Qualiflyer: registered, no track badge yet"
       }
       className={cn(
-        "px-3 py-1 text-sm font-medium",
-        qualiflyer ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900",
+        "h-auto gap-1.5 rounded-full px-3 py-1 text-sm font-semibold",
+        qualiflyer
+          ? "bg-grit text-white shadow-md"
+          : "bg-white text-slate-700 ring-1 ring-slate-200",
       )}
     >
+      {qualiflyer ? (
+        <TrophyIcon className="size-4 text-spark" aria-hidden="true" />
+      ) : (
+        <SparklesIcon className="size-4 text-primary" aria-hidden="true" />
+      )}
       {qualiflyer ? "Qualiflyer" : "Pre-Qualiflyer"}
     </Badge>
   );

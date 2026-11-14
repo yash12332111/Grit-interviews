@@ -38,7 +38,7 @@ export function PersonaSwitcher({ currentId, groups }: PersonaSwitcherProps) {
 
   return (
     <Select items={items} value={currentId} onValueChange={handleChange} disabled={pending}>
-      <SelectTrigger size="sm" className="w-52 max-w-full bg-background" aria-label="Switch persona">
+      <SelectTrigger size="sm" className="w-52 max-w-full bg-white text-foreground" aria-label="Switch persona">
         <SelectValue placeholder="Choose a persona" />
       </SelectTrigger>
       <SelectContent>

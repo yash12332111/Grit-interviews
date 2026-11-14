@@ -6,8 +6,8 @@ import { WEEK_DAYS } from "@/db/queries/interviewer";
 import { WithdrawSlotButton } from "./WithdrawSlotButton";
 
 const STATUS_STYLE: Record<SlotView["status"], string> = {
-  open: "border-emerald-200 bg-emerald-50 text-emerald-900",
-  booked: "border-sky-200 bg-sky-50 text-sky-900",
+  open: "border-emerald-200 bg-emerald-50/80 text-emerald-900",
+  booked: "border-indigo-200 bg-indigo-50 text-indigo-900",
   withdrawn: "border-dashed bg-muted/40 text-muted-foreground",
 };
 
@@ -41,14 +41,14 @@ export function WeekGrid({ from, slots, now }: { from: Date; slots: SlotView[]; 
   return (
     <section className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-base font-semibold">Your next 7 days</h2>
+        <h2 className="text-lg font-semibold">Your next 7 days</h2>
         <Legend />
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {days.map(({ key, day, slots: daySlots }) => (
-          <div key={key} className="space-y-2 rounded-xl border bg-card p-3">
-            <div>
-              <p className="text-sm font-medium">{relativeDayLabel(day, now)}</p>
+          <div key={key} className="space-y-2 rounded-2xl border bg-card p-3 shadow-soft">
+            <div className="flex items-baseline justify-between gap-2 border-b pb-2">
+              <p className="text-sm font-semibold">{relativeDayLabel(day, now)}</p>
               <p className="text-xs text-muted-foreground">{formatDate(day)}</p>
             </div>
             {daySlots.length === 0 ? (
@@ -59,7 +59,7 @@ export function WeekGrid({ from, slots, now }: { from: Date; slots: SlotView[]; 
                   <li
                     key={slot.id}
                     className={cn(
-                      "flex items-center justify-between gap-2 rounded-lg border px-2 py-1 text-xs",
+                      "flex items-center justify-between gap-2 rounded-xl border px-2.5 py-1.5 text-xs",
                       STATUS_STYLE[slot.status],
                     )}
                   >

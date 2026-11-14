@@ -32,24 +32,27 @@ export function MessageBanner({ title, body, ctaLabel, ctaHref, notificationId }
   return (
     <section
       aria-label="Latest message"
-      className="flex items-start gap-3 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sky-950"
+      className="relative flex items-start gap-3 overflow-hidden rounded-2xl border bg-card p-4 shadow-soft"
     >
-      <BellIcon className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <h2 className="text-sm font-semibold">{title}</h2>
-        <p className="text-sm">{body}</p>
+      <span aria-hidden="true" className="absolute inset-y-0 left-0 w-1.5 bg-grit" />
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+        <BellIcon className="size-5" aria-hidden="true" />
+      </span>
+      <div className="min-w-0 flex-1 space-y-2">
+        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">{body}</p>
         {ctaLabel && ctaHref ? (
           external ? (
             <a
               href={ctaHref}
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
+              className={buttonVariants({ size: "sm" })}
             >
               {ctaLabel}
             </a>
           ) : (
-            <Link href={ctaHref} className={buttonVariants({ variant: "outline", size: "sm" })}>
+            <Link href={ctaHref} className={buttonVariants({ size: "sm" })}>
               {ctaLabel}
             </Link>
           )

@@ -76,9 +76,9 @@ export function SlotPicker({ attemptId, badgeLabel, days, reschedule }: SlotPick
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 rounded-2xl border bg-card p-5 shadow-soft">
       <div className="space-y-2">
-        <h2 className="text-sm font-medium">1. Pick a date</h2>
+        <h2 className="text-sm font-semibold">1. Pick a date</h2>
         <div role="tablist" aria-label="Dates" className="flex gap-2 overflow-x-auto pb-1">
           {days.map((d) => (
             <button
@@ -91,10 +91,10 @@ export function SlotPicker({ attemptId, badgeLabel, days, reschedule }: SlotPick
                 setTimeIso(null);
               }}
               className={cn(
-                "shrink-0 rounded-lg border px-3 py-2 text-sm transition",
+                "shrink-0 rounded-xl border px-4 py-2.5 text-sm font-medium shadow-sm transition",
                 d.key === day.key
-                  ? "border-foreground bg-foreground text-background"
-                  : "bg-card hover:border-foreground/40",
+                  ? "border-transparent bg-grit text-white shadow-md"
+                  : "bg-card hover:border-primary/40 hover:text-primary",
               )}
             >
               {d.label}
@@ -104,8 +104,8 @@ export function SlotPicker({ attemptId, badgeLabel, days, reschedule }: SlotPick
       </div>
 
       <div className="space-y-2">
-        <h2 className="text-sm font-medium">2. Pick a time (IST)</h2>
-        <div className="flex flex-wrap gap-2">
+        <h2 className="text-sm font-semibold">2. Pick a time (IST)</h2>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-6">
           {day.times.map((t) => (
             <button
               key={t.iso}
@@ -113,10 +113,10 @@ export function SlotPicker({ attemptId, badgeLabel, days, reschedule }: SlotPick
               aria-pressed={t.iso === time?.iso}
               onClick={() => setTimeIso(t.iso)}
               className={cn(
-                "rounded-lg border px-3 py-1.5 text-sm transition",
+                "rounded-xl border px-3 py-2.5 text-sm font-semibold tabular-nums transition",
                 t.iso === time?.iso
-                  ? "border-foreground bg-foreground text-background"
-                  : "bg-card hover:border-foreground/40",
+                  ? "border-primary bg-primary text-primary-foreground shadow-md"
+                  : "bg-card hover:border-primary/40 hover:bg-primary/5 hover:text-primary",
               )}
             >
               {t.label}
@@ -126,7 +126,11 @@ export function SlotPicker({ attemptId, badgeLabel, days, reschedule }: SlotPick
       </div>
 
       <ConfirmDialog
-        trigger={<Button disabled={!time}>{reschedule ? "Reschedule interview" : "Book interview"}</Button>}
+        trigger={
+          <Button size="lg" className="px-5" disabled={!time}>
+            {reschedule ? "Reschedule interview" : "Book interview"}
+          </Button>
+        }
         title={reschedule ? "Move your interview?" : "Confirm your interview"}
         description={
           time

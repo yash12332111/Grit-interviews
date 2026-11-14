@@ -1,5 +1,6 @@
-import { Badge } from "@/components/ui/badge";
-import { JOURNEY_STATE_LABEL, JourneyState } from "@/domain/states";
+import { BanIcon, LockIcon, SparklesIcon, TrophyIcon } from "lucide-react";
+import { STATE_TONE, StateBadge } from "@/components/shared/StateBadge";
+import { JourneyState } from "@/domain/states";
 import type { JourneyView } from "@/db/queries/student";
 import { cn } from "@/lib/utils";
 
@@ -12,43 +13,77 @@ function kindOf(state: JourneyState): TileKind {
   return "in_progress";
 }
 
-const KIND_STYLE: Record<TileKind, string> = {
-  earned: "border-emerald-300 bg-emerald-50",
-  nullified: "border-rose-200 bg-rose-50",
-  in_progress: "border-sky-200 bg-sky-50",
+const TILE: Record<TileKind, string> = {
+  earned: "border-emerald-200 bg-gradient-to-br from-emerald-50 to-white",
+  nullified: "border-rose-200 bg-gradient-to-br from-rose-50 to-white",
+  in_progress: "border-indigo-200 bg-gradient-to-br from-indigo-50 to-white",
   locked: "border-dashed bg-muted/40 text-muted-foreground",
 };
 
-/** One tile per badge in the track, whatever the student's progress (architecture §8.1 /student/badges). */
+const MEDAL: Record<TileKind, string> = {
+  earned: "bg-gradient-to-br from-amber-300 to-orange-500 text-white shadow-lg shadow-orange-200",
+  nullified: "bg-rose-100 text-rose-600",
+  in_progress: "bg-grit text-white shadow-md",
+  locked: "bg-slate-200 text-slate-500",
+};
+
+/** One tile per badge in the track, shown as a path from Novice upward (architecture §8.1 /student/badges). */
 export function BadgeShelf({ journeys }: { journeys: JourneyView[] }) {
   return (
-    <ul className="grid gap-3 sm:grid-cols-2" aria-label="Badge shelf">
-      {journeys.map((j) => {
+    <ul className="grid gap-4 [grid-template-columns:repeat(auto-fit,minmax(15rem,1fr))]" aria-label="Badge shelf">
+      {journeys.map((j, i) => {
         const kind = kindOf(j.state);
+        const Medal =
+          kind === "earned" ? TrophyIcon : kind === "nullified" ? BanIcon : kind === "locked" ? LockIcon : STATE_TONE[j.state].icon;
         return (
           <li
             key={j.badge.id}
             data-kind={kind}
-            className={cn("space-y-2 rounded-xl border p-4", KIND_STYLE[kind])}
+            className={cn("relative space-y-3 rounded-2xl border p-5 shadow-soft", TILE[kind])}
           >
-            <div className="flex items-start justify-between gap-2">
-              <p
-                className={cn(
-                  "text-base font-semibold",
-                  kind === "nullified" && "line-through decoration-2",
-                )}
-              >
-                {j.badge.label}
-              </p>
-              {kind === "earned" && <Badge className="bg-emerald-600 text-white">Earned</Badge>}
-              {kind === "nullified" && <Badge variant="destructive">Nullified</Badge>}
-              {kind === "in_progress" && <Badge variant="secondary">{JOURNEY_STATE_LABEL[j.state]}</Badge>}
-              {kind === "locked" && <Badge variant="outline">Locked</Badge>}
+            <div className="flex items-start gap-4">
+              <span className={cn("grid size-14 shrink-0 place-items-center rounded-full", MEDAL[kind])}>
+                <Medal className="size-7" aria-hidden="true" />
+              </span>
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <p
+                  className={cn(
+                    "text-lg font-bold break-words",
+                    kind === "nullified" && "line-through decoration-2 text-rose-900/70",
+                  )}
+                >
+                  {j.badge.label}
+                </p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    Level {i + 1}
+                  </span>
+                  {kind === "earned" && (
+                    <span data-slot="badge" className="rounded-full bg-emerald-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                      Earned
+                    </span>
+                  )}
+                  {kind === "nullified" && (
+                    <span data-slot="badge" className="rounded-full bg-rose-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                      Nullified
+                    </span>
+                  )}
+                  {kind === "in_progress" && <StateBadge state={j.state} />}
+                  {kind === "locked" && (
+                    <span data-slot="badge" className="rounded-full bg-white px-2.5 py-0.5 text-xs font-semibold text-slate-600 ring-1 ring-slate-200">
+                      Locked
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
 
             {kind === "earned" && (
-              <p className="text-sm">
-                <strong>+{j.badge.bonusMiles} bonus miles</strong> added to your GRIT profile.
+              <p className="flex items-center gap-1.5 text-sm">
+                <SparklesIcon className="size-4 text-spark" aria-hidden="true" />
+                <span>
+                  <strong>+{j.badge.bonusMiles} bonus miles</strong> added to your GRIT profile.
+                </span>
               </p>
             )}
             {kind === "nullified" && (

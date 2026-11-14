@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import { ArrowRightIcon, SparklesIcon, VideoIcon } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { STATE_TONE, StateBadge } from "@/components/shared/StateBadge";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CHANGE_CUTOFF_HOURS, MAX_RESCHEDULES } from "@/domain/config";
 import { canCancel, canReschedule } from "@/domain/rules";
@@ -21,14 +23,28 @@ type JourneyCardProps = {
 /** One card per badge journey on the student home. */
 export function JourneyCard({ journey, now, next = null }: JourneyCardProps) {
   const { badge, state, attempt, booking, award, lastResult } = journey;
+  const tone = STATE_TONE[state];
+  const Icon = tone.icon;
 
   return (
-    <Card data-state={state}>
-      <CardHeader className="flex-row items-center justify-between gap-2">
-        <CardTitle className="text-base">{badge.label} badge</CardTitle>
-        <Badge variant="secondary">{JOURNEY_STATE_LABEL[state]}</Badge>
+    <Card data-state={state} className="relative overflow-hidden shadow-soft">
+      <span aria-hidden="true" className={cn("absolute inset-y-0 left-0 w-1.5", tone.rail)} />
+      <CardHeader className="flex flex-wrap items-center justify-between gap-3 pl-6">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className={cn("grid size-11 shrink-0 place-items-center rounded-xl", tone.iconWrap)}>
+            <Icon className="size-5" aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <CardTitle className="text-base font-semibold">{badge.label} badge</CardTitle>
+            <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <SparklesIcon className="size-3 text-spark" aria-hidden="true" />
+              {badge.bonusMiles} bonus miles on clearing
+            </p>
+          </div>
+        </div>
+        <StateBadge state={state} />
       </CardHeader>
-      <CardContent className="space-y-3 text-sm">
+      <CardContent className="space-y-3 pl-6 text-sm">
         {state === JourneyState.NOT_ELIGIBLE && (
           <p className="text-muted-foreground">
             You aren&apos;t eligible for the {badge.label} interview yet. Keep clearing skill levels
@@ -40,8 +56,9 @@ export function JourneyCard({ journey, now, next = null }: JourneyCardProps) {
           <>
             {lastResult?.status === "retake_later" && <LastRetakeNote journey={journey} />}
             <p>You&apos;re eligible. Pick a time that works for you and lock in your interview.</p>
-            <Link href={`/student/book/${attempt.id}`} className={buttonVariants()}>
+            <Link href={`/student/book/${attempt.id}`} className={cn(buttonVariants({ size: "lg" }), "px-4")}>
               Book interview
+              <ArrowRightIcon data-icon="inline-end" />
             </Link>
           </>
         )}
@@ -72,8 +89,9 @@ export function JourneyCard({ journey, now, next = null }: JourneyCardProps) {
               ) : null}{" "}
               It doesn&apos;t count against your reschedule limit.
             </p>
-            <Link href={`/student/book/${attempt.id}`} className={buttonVariants()}>
+            <Link href={`/student/book/${attempt.id}`} className={cn(buttonVariants({ size: "lg" }), "px-4")}>
               Rebook interview
+              <ArrowRightIcon data-icon="inline-end" />
             </Link>
           </>
         )}
@@ -91,7 +109,8 @@ export function JourneyCard({ journey, now, next = null }: JourneyCardProps) {
               <strong>Badge earned</strong>
               {award ? ` on ${formatDate(award.awardedAt)}` : ""}. Well done!
             </p>
-            <p className="text-base font-semibold text-emerald-700">
+            <p className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-base font-semibold text-emerald-700 ring-1 ring-emerald-200">
+              <SparklesIcon className="size-4" aria-hidden="true" />
               +{badge.bonusMiles} bonus miles
             </p>
             {lastResult?.status === "passed" && lastResult.notes ? (
@@ -182,17 +201,24 @@ function BookedBody({ journey, now }: { journey: JourneyView; now: Date }) {
 
   return (
     <>
-      <div className="space-y-1">
-        <p className="text-base font-semibold">
-          {relativeDayLabel(booking.startAt, now)}, {formatDateTime(booking.startAt)}
-        </p>
-        <p className="text-muted-foreground">With {booking.interviewerFirstName}</p>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-sky-50/70 p-3 ring-1 ring-sky-100">
+        <div className="space-y-0.5">
+          <p className="text-base font-semibold">
+            {/* "Tomorrow, Sun, 15 Nov, …" — but don't repeat the date when it isn't a near day. */}
+            {["Today", "Tomorrow", "Yesterday"].includes(relativeDayLabel(booking.startAt, now))
+              ? `${relativeDayLabel(booking.startAt, now)}, `
+              : ""}
+            {formatDateTime(booking.startAt)}
+          </p>
+          <p className="text-muted-foreground">With {booking.interviewerFirstName}</p>
+        </div>
         <a
           href={booking.meetingUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm font-medium underline underline-offset-4"
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "bg-white")}
         >
+          <VideoIcon data-icon="inline-start" />
           Join link
         </a>
       </div>

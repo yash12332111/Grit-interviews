@@ -5,6 +5,8 @@ import { deriveTier } from "@/domain/derive";
 import { AwardStatus, UserRole } from "@/domain/states";
 import { BadgeShelf } from "@/components/student/BadgeShelf";
 import { TierChip } from "@/components/student/TierChip";
+import { AwardIcon } from "lucide-react";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 export default async function BadgesPage() {
   // The layout redirects other roles; this just narrows the type.
@@ -20,15 +22,12 @@ export default async function BadgesPage() {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-8">
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Your badges</h1>
-          <p className="text-sm text-muted-foreground">
-            Every badge in your track, from earned to locked.
-          </p>
-        </div>
-        <TierChip tier={tier} />
-      </div>
+      <PageHeader
+        icon={AwardIcon}
+        title="Your badges"
+        description="Every badge in your track, from earned to locked."
+        actions={<TierChip tier={tier} />}
+      />
       <BadgeShelf journeys={allJourneys} />
       <Link href="/student" className="inline-block text-sm font-medium underline underline-offset-4">
         Back to home

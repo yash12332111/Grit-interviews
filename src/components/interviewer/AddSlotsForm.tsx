@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CalendarPlusIcon } from "lucide-react";
 import { addSlots } from "@/actions/availability";
 
 type AddSlotsFormProps = {
@@ -64,12 +65,17 @@ export function AddSlotsForm({ minDate, defaultDate }: AddSlotsFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border bg-card p-4" noValidate>
-      <div>
-        <h2 className="text-base font-semibold">Add availability</h2>
-        <p className="text-sm text-muted-foreground">
-          Slots are 30 minutes each, on the hour and half hour (IST).
-        </p>
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border bg-card p-5 shadow-soft" noValidate>
+      <div className="flex items-center gap-3">
+        <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
+          <CalendarPlusIcon className="size-5" aria-hidden="true" />
+        </span>
+        <div>
+          <h2 className="text-base font-semibold">Add availability</h2>
+          <p className="text-sm text-muted-foreground">
+            Slots are 30 minutes each, on the hour and half hour (IST).
+          </p>
+        </div>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
         <Field id="date" label="Date" error={errors.date}>

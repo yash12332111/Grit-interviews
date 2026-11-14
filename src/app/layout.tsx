@@ -16,12 +16,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="flex min-h-full flex-col bg-background text-foreground">
+      <body className="flex min-h-full flex-col bg-background bg-grit-soft text-foreground">
         {/* Everything below reads the DB or cookies, so it is rendered per
             request (Cache Components: dynamic work lives inside <Suspense>). */}
         <Suspense fallback={<LoadingSkeleton />}>
           <FreshDemoGate>
-            <Suspense fallback={<div className="h-12 border-b bg-amber-50" />}>
+            <Suspense fallback={<div className="h-[60px] bg-grit" />}>
               <DemoBanner />
             </Suspense>
             <main className="flex flex-1 flex-col">{children}</main>

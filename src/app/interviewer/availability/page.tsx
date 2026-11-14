@@ -4,6 +4,8 @@ import { UserRole } from "@/domain/states";
 import { addIstDays, istDayKey } from "@/lib/time";
 import { AddSlotsForm } from "@/components/interviewer/AddSlotsForm";
 import { WeekGrid } from "@/components/interviewer/WeekGrid";
+import { CalendarRangeIcon } from "lucide-react";
+import { PageHeader } from "@/components/shared/PageHeader";
 
 export default async function AvailabilityPage() {
   // The layout redirects other roles; this just narrows the type.
@@ -15,13 +17,11 @@ export default async function AvailabilityPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Availability</h1>
-        <p className="text-sm text-muted-foreground">
-          Add the times you can interview. Students pick from the pooled open times, and a booked
-          slot can still be withdrawn with a reason.
-        </p>
-      </div>
+      <PageHeader
+        icon={CalendarRangeIcon}
+        title="Availability"
+        description="Add the times you can interview. Students pick from the pooled open times, and a booked slot can still be withdrawn with a reason."
+      />
       <AddSlotsForm minDate={istDayKey(now)} defaultDate={istDayKey(addIstDays(now, 1))} />
       <WeekGrid from={from} slots={slots} now={now} />
     </div>

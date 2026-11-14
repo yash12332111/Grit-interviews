@@ -6,6 +6,9 @@
 
 @theme inline {
   --color-background: var(--background);
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-spark: var(--spark);
   --color-foreground: var(--foreground);
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -49,30 +52,34 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* GRIT Interviews brand: deep indigo, violet, and a warm "spark" orange. */
+  --background: oklch(0.982 0.006 280);
+  --foreground: oklch(0.21 0.035 275);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.21 0.035 275);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --popover-foreground: oklch(0.21 0.035 275);
+  --primary: oklch(0.47 0.21 277);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.955 0.02 280);
+  --secondary-foreground: oklch(0.33 0.11 277);
+  --muted: oklch(0.962 0.01 280);
+  --muted-foreground: oklch(0.5 0.03 275);
+  --accent: oklch(0.955 0.02 280);
+  --accent-foreground: oklch(0.33 0.11 277);
+  --destructive: oklch(0.58 0.22 22);
+  --border: oklch(0.912 0.014 278);
+  --input: oklch(0.89 0.018 278);
+  --ring: oklch(0.6 0.18 277);
+  --chart-1: oklch(0.6 0.18 277);
+  --chart-2: oklch(0.7 0.17 50);
+  --chart-3: oklch(0.65 0.15 160);
+  --chart-4: oklch(0.6 0.2 300);
+  --chart-5: oklch(0.6 0.2 22);
+  --radius: 0.8rem;
+  --brand: oklch(0.42 0.2 277);
+  --brand-2: oklch(0.5 0.22 300);
+  --spark: oklch(0.74 0.17 52);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -128,3 +135,23 @@
     @apply font-sans;
   }
 }
+
+/* Brand surfaces */
+@utility bg-grit {
+  background-image: linear-gradient(120deg, var(--brand) 0%, var(--brand-2) 55%, oklch(0.55 0.2 330) 100%);
+}
+@utility text-grit {
+  background-image: linear-gradient(100deg, var(--brand) 10%, var(--brand-2) 60%, var(--spark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+@utility bg-grit-soft {
+  background-image:
+    radial-gradient(60rem 30rem at 10% -10%, oklch(0.93 0.05 280 / 0.9), transparent 60%),
+    radial-gradient(40rem 24rem at 95% 0%, oklch(0.95 0.05 55 / 0.7), transparent 60%);
+}
+@utility shadow-soft {
+  box-shadow: 0 1px 2px oklch(0.3 0.05 277 / 0.06), 0 8px 24px -12px oklch(0.3 0.08 277 / 0.18);
+}
+

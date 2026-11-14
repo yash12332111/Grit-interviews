@@ -13,7 +13,7 @@ export function ResetDemoButton() {
   return (
     <ConfirmDialog
       trigger={
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white">
           <RotateCcwIcon data-icon="inline-start" />
           Reset demo data
         </Button>
